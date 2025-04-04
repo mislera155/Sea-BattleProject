@@ -60,3 +60,25 @@ class Board:
         
         self.ships.append(ship)
         return True
+
+    def receive_attack(self, x: int, y: int) -> Tuple[bool, Optional[Ship]]:
+        if not (0 <= x < self.size and 0 <= y < self.size):
+            return False, None
+        
+        if self.grid[x][y] == 'X' or self.grid[x][y] == '○':
+            return False, None
+        
+        hit_ship = None
+        for ship in self.ships:
+            if ship.hit((x, y)):
+                hit_ship = ship
+                break
+        
+        if hit_ship:
+            self.grid[x][y] = 'X'
+            self.hit_cells.add((x, y))
+            return True, hit_ship
+        else:
+            self.grid[x][y] = '○'
+            self.miss_cells.add((x, y))
+            return False, None
