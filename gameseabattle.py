@@ -31,3 +31,32 @@ class Ship:
             5: "Авианосец"
         }
         return names.get(size, "Корабль")
+
+class Board:
+    def __init__(self, size: int = 10):
+        self.size = size
+        self.grid = [['~' for _ in range(size)] for _ in range(size)]
+        self.ships = []
+        self.hit_cells = set()
+        self.miss_cells = set()
+    
+    def place_ship(self, ship: Ship) -> bool:
+        for x, y in ship.positions:
+            if not (0 <= x < self.size and 0 <= y < self.size):
+                return False
+            if self.grid[x][y] != '~':
+                return False
+        
+        for x, y in ship.positions:
+            for dx in [-1, 0, 1]:
+                for dy in [-1, 0, 1]:
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < self.size and 0 <= ny < self.size:
+                        if self.grid[nx][ny] != '~':
+                            return False
+        
+        for x, y in ship.positions:
+            self.grid[x][y] = '■'
+        
+        self.ships.append(ship)
+        return True
