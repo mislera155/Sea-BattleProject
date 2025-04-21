@@ -82,3 +82,24 @@ class Board:
             self.grid[x][y] = '○'
             self.miss_cells.add((x, y))
             return False, None
+    
+    def all_ships_sunk(self) -> bool:
+        return all(ship.is_sunk() for ship in self.ships)
+    
+    def display(self, show_ships: bool = False) -> None:
+        print("   " + " ".join(f"{i:2}" for i in range(self.size)))
+        for i in range(self.size):
+            row = []
+            for j in range(self.size):
+                cell = self.grid[i][j]
+                if not show_ships and cell == '■':
+                    row.append(' ~')
+                else:
+                    row.append(f" {cell}")
+            print(f"{i:2}" + "".join(row))
+    
+    def get_ship_at_position(self, x: int, y: int) -> Optional[Ship]:
+        for ship in self.ships:
+            if (x, y) in ship.positions:
+                return ship
+        return None
