@@ -103,3 +103,53 @@ class Board:
             if (x, y) in ship.positions:
                 return ship
         return None
+
+class Player:
+    def __init__(self, name: str):
+        self.name = name
+        self.board = Board()
+        self.enemy_board = Board()
+        self.score = 0
+        self.shots = 0
+        self.hits = 0
+        self.misses = 0
+        self.ships_sunk = 0
+    
+    def place_ships(self) -> None:
+        ship_sizes = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1]
+        print(f"\n{self.name}, доступные корабли:")
+        for size in ship_sizes:
+            print(f"- {Ship.get_ship_name(size)} (размер: {size})")
+        
+        for size in ship_sizes:
+            placed = False
+            while not placed:
+                print(f"\n{self.name}, разместите {Ship.get_ship_name(size)} (размер: {size})")
+                self.board.display(show_ships=True)
+                
+                try:
+                    x, y = map(int, input("Введите начальные координаты (строка столбец): ").split())
+                    orientation = input("Выберите ориентацию (г - горизонтально, в - вертикально): ").lower()
+                    
+                    positions = []
+                    if orientation == 'г':
+                        for i in range(size):
+                            positions.append((x, y + i))
+                    elif orientation == 'в':
+                        for i in range(size):
+                            positions.append((x + i, y))
+                    else:
+                        print("Неверная ориентация. Используйте 'г' или 'в'.")
+                        continue
+                    
+                    ship = Ship(size, positions)
+                    if self.board.place_ship(ship):
+                        placed = True
+                    else:
+                        print("Невозможно разместить корабль в этом месте. Попробуйте снова.")
+                except ValueError:
+                    print("Неверный ввод. Введите координаты как два числа через пробел.")
+        
+        print(f"\n{self.name}, все корабли размещены!")
+        self.board.display(show_ships=True)
+        input("Нажмите Enter чтобы продолжить...")
