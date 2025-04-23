@@ -153,3 +153,45 @@ class Player:
         print(f"\n{self.name}, все корабли размещены!")
         self.board.display(show_ships=True)
         input("Нажмите Enter чтобы продолжить...")
+        
+    def make_move(self, opponent: 'Player') -> bool:
+        print(f"\nХод игрока {self.name}")
+        print("Ваше поле:")
+        self.board.display(show_ships=True)
+        print("\nПоле противника:")
+        opponent.board.display(show_ships=False)
+        
+        # Показать статистику
+        print(f"\nСтатистика {self.name}:")
+        print(f"Выстрелы: {self.shots} | Попадания: {self.hits} | Промахи: {self.misses}")
+        print(f"Точность: {self.get_accuracy():.1f}% | Потоплено кораблей: {self.ships_sunk}")
+        
+        while True:
+            try:
+                coords = input("Введите координаты для выстрела (строка столбец) или 'q' для выхода: ")
+                if coords.lower() == 'q':
+                    print("Игра прервана.")
+                    exit()
+                
+                x, y = map(int, coords.split())
+                hit, ship = opponent.board.receive_attack(x, y)
+                self.shots += 1
+                
+                if hit:
+                    self.hits += 1
+                    print("Попадание!")
+                    if ship.is_sunk():
+                        self.ships_sunk += 1
+                        print(f"{ship.name} размером {ship.size} потоплен!")
+                        # Награда за потопление корабля
+                        self.score += ship.size * 10
+                    else:
+                        # Награда за попадание
+                        self.score += 5
+                    return True
+                else:
+                    self.misses += 1
+                    print("Промах!")
+                    return False
+            except ValueError:
+                print("Неверный ввод. Введите координаты как два числа через пробел.")
