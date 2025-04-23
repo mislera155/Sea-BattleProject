@@ -153,7 +153,7 @@ class Player:
         print(f"\n{self.name}, все корабли размещены!")
         self.board.display(show_ships=True)
         input("Нажмите Enter чтобы продолжить...")
-        
+
     def make_move(self, opponent: 'Player') -> bool:
         print(f"\nХод игрока {self.name}")
         print("Ваше поле:")
@@ -195,3 +195,35 @@ class Player:
                     return False
             except ValueError:
                 print("Неверный ввод. Введите координаты как два числа через пробел.")
+                
+    def get_accuracy(self) -> float:
+        if self.shots == 0:
+            return 0.0
+        return (self.hits / self.shots) * 100
+    
+    def save_stats(self, filename: str = "battleship_stats.json") -> None:
+        stats = {
+            "player": self.name,
+            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "shots": self.shots,
+            "hits": self.hits,
+            "misses": self.misses,
+            "accuracy": self.get_accuracy(),
+            "ships_sunk": self.ships_sunk,
+            "score": self.score
+        }
+        
+        all_stats = []
+        if os.path.exists(filename):
+            with open(filename, "r") as f:
+                try:
+                    all_stats = json.load(f)
+                except json.JSONDecodeError:
+                    all_stats = []
+        
+        all_stats.append(stats)
+        
+        with open(filename, "w") as f:
+            json.dump(all_stats, f, indent=2)
+        
+        print(f"\nСтатистика игры сохранена в файл {filename}")
