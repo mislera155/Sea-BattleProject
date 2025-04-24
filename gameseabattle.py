@@ -305,7 +305,6 @@ class AIPlayer(Player):
                                     self.last_hits = []
                                     self.current_direction = None
                                     self.first_hit = None
-                                    # Удаляем соседние клетки, так как там не может быть других кораблей
                                     self.remove_adjacent_cells(ship, opponent)
                                 else:
                                     self.score += 5
@@ -315,7 +314,6 @@ class AIPlayer(Player):
                                 print("Промах!")
                                 return False
             else:
-                # Продолжаем в выбранном направлении
                 last_x, last_y = self.last_hits[-1]
                 dx, dy = self.current_direction
                 x = last_x + dx
@@ -351,4 +349,42 @@ class AIPlayer(Player):
                 else:
                     self.current_direction = (-dx, -dy)
                     return self.make_move(opponent)
+                
+        while self.available_shots:
+            x, y = self.available_shots.pop()
+            if opponent.board.grid[x][y] not in ['X', '○']:
+                print(f"Компьютер стреляет в {x} {y}")
+                hit, ship = opponent.board.receive_attack(x, y)
+                self.shots += 1
+                
+                if hit:
+                    self.hits += 1
+                    self.last_hits.append((x, y))
+                    print("Попадание!")
+                    if ship.is_sunk():
+                        self.ships_sunk += 1
+                        self.score += ship.size * 10
+                        print(f"{ship.name} размером {ship.size} потоплен!")
+                        self.last_hits = []
+                        self.remove_adjacent_cells(ship, opponent)
+                    else:
+                        self.score += 5
+                    return True
+                else:
+                    self.misses += 1
+                    print("Промах!")
+                    return False
+        
+        print("Компьютер не нашел доступных клеток для выстрела!")
+        return False
+    
+    def remove_adjacent_cells(self, ship: Ship, opponent: Player) -> None:
+        """Удаляет соседние клетки потопленного корабля из доступных для выстрелов"""
+        for x, y in ship.positions:
+            for dx in [-1, 0, 1]:
+                for dy in [-1, 0, 1]:
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < self.board.size and 0 <= ny < self.board.size:
+                        if (nx, ny) in self.available_shots:
+                            self.available_shots.remove((nx, ny))
     
