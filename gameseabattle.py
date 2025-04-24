@@ -195,7 +195,7 @@ class Player:
                     return False
             except ValueError:
                 print("Неверный ввод. Введите координаты как два числа через пробел.")
-                
+
     def get_accuracy(self) -> float:
         if self.shots == 0:
             return 0.0
@@ -227,3 +227,52 @@ class Player:
             json.dump(all_stats, f, indent=2)
         
         print(f"\nСтатистика игры сохранена в файл {filename}")
+
+class AIPlayer(Player):
+    DIFFICULTY_LEVELS = {
+        "easy": {"delay": 2.0, "randomness": 0.7},
+        "medium": {"delay": 1.0, "randomness": 0.4},
+        "hard": {"delay": 0.5, "randomness": 0.1}
+    }
+    
+    def __init__(self, difficulty: str = "medium"):
+        super().__init__("Компьютер")
+        self.last_hits = []
+        self.directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+        self.current_direction = None
+        self.first_hit = None
+        self.difficulty = difficulty if difficulty in self.DIFFICULTY_LEVELS else "medium"
+        self.available_shots = [(x, y) for x in range(10) for y in range(10)]
+        random.shuffle(self.available_shots)
+    
+    def place_ships(self) -> None:
+        ship_sizes = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1]
+        for size in ship_sizes:
+            placed = False
+            attempts = 0
+            
+            while not placed and attempts < 100:
+                x = random.randint(0, self.board.size - 1)
+                y = random.randint(0, self.board.size - 1)
+                orientation = random.choice(['г', 'в'])
+                
+                positions = []
+                if orientation == 'г':
+                    for i in range(size):
+                        positions.append((x, y + i))
+                else:
+                    for i in range(size):
+                        positions.append((x + i, y))
+                
+                ship = Ship(size, positions)
+                if self.board.place_ship(ship):
+                    placed = True
+                else:
+                    attempts += 1
+            
+            if not placed:
+                print(f"Компьютер не смог разместить корабль размером {size} после 100 попыток.")
+    
+    def make_move(self, opponent: Player) -> bool:
+        print(f"\nХод компьютера {self.name} (уровень: {self.difficulty})")
+        time.sleep(self.DIFFICULTY_LEVELS[self.difficulty]["delay"])
