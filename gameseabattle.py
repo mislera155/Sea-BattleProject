@@ -276,3 +276,79 @@ class AIPlayer(Player):
     def make_move(self, opponent: Player) -> bool:
         print(f"\nХод компьютера {self.name} (уровень: {self.difficulty})")
         time.sleep(self.DIFFICULTY_LEVELS[self.difficulty]["delay"])
+
+        if self.last_hits and random.random() > self.DIFFICULTY_LEVELS[self.difficulty]["randomness"]:
+            if not self.current_direction:
+                if not self.first_hit:
+                    self.first_hit = self.last_hits[0]
+                
+                for dx, dy in self.directions:
+                    x, y = self.first_hit
+                    x += dx
+                    y += dy
+                    if 0 <= x < self.board.size and 0 <= y < self.board.size:
+                        if opponent.board.grid[x][y] not in ['X', '○'] and (x, y) in self.available_shots:
+                            self.available_shots.remove((x, y))
+                            print(f"Компьютер стреляет в {x} {y}")
+                            hit, ship = opponent.board.receive_attack(x, y)
+                            self.shots += 1
+                            
+                            if hit:
+                                self.hits += 1
+                                self.last_hits.append((x, y))
+                                self.current_direction = (dx, dy)
+                                print("Попадание!")
+                                if ship.is_sunk():
+                                    self.ships_sunk += 1
+                                    self.score += ship.size * 10
+                                    print(f"{ship.name} размером {ship.size} потоплен!")
+                                    self.last_hits = []
+                                    self.current_direction = None
+                                    self.first_hit = None
+                                    # Удаляем соседние клетки, так как там не может быть других кораблей
+                                    self.remove_adjacent_cells(ship, opponent)
+                                else:
+                                    self.score += 5
+                                return True
+                            else:
+                                self.misses += 1
+                                print("Промах!")
+                                return False
+            else:
+                # Продолжаем в выбранном направлении
+                last_x, last_y = self.last_hits[-1]
+                dx, dy = self.current_direction
+                x = last_x + dx
+                y = last_y + dy
+                
+                if 0 <= x < self.board.size and 0 <= y < self.board.size:
+                    if opponent.board.grid[x][y] not in ['X', '○'] and (x, y) in self.available_shots:
+                        self.available_shots.remove((x, y))
+                        print(f"Компьютер стреляет в {x} {y}")
+                        hit, ship = opponent.board.receive_attack(x, y)
+                        self.shots += 1
+                        
+                        if hit:
+                            self.hits += 1
+                            self.last_hits.append((x, y))
+                            print("Попадание!")
+                            if ship.is_sunk():
+                                self.ships_sunk += 1
+                                self.score += ship.size * 10
+                                print(f"{ship.name} размером {ship.size} потоплен!")
+                                self.last_hits = []
+                                self.current_direction = None
+                                self.first_hit = None
+                                self.remove_adjacent_cells(ship, opponent)
+                            else:
+                                self.score += 5
+                            return True
+                        else:
+                            self.misses += 1
+                            print("Промах!")
+                            self.current_direction = (-dx, -dy)
+                            return False
+                else:
+                    self.current_direction = (-dx, -dy)
+                    return self.make_move(opponent)
+    
