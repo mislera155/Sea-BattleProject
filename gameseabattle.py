@@ -441,3 +441,43 @@ class Game:
         self.player2 = Player(input("Введите имя второго игрока: "))
         self.current_player = self.player1
         self.opponent = self.player2
+    
+    def show_stats(self, filename: str = "battleship_stats.json") -> None:
+        if not os.path.exists(filename):
+            print("Статистика пока недоступна.")
+            return
+        
+        try:
+            with open(filename, "r") as f:
+                stats = json.load(f)
+            
+            if not stats:
+                print("Статистика пока недоступна.")
+                return
+            
+            print("\nИстория игр:")
+            print("="*80)
+            print(f"{'Игрок':<15} {'Дата':<20} {'Выстрелы':<10} {'Попадания':<10} {'Точность':<10} {'Потоплено':<10} {'Очки':<10}")
+            print("-"*80)
+            
+            for game in sorted(stats, key=lambda x: x['date'], reverse=True)[:10]:
+                print(f"{game['player']:<15} {game['date']:<20} {game['shots']:<10} {game['hits']:<10} "
+                      f"{game['accuracy']:.1f}%{'':<3} {game['ships_sunk']:<10} {game['score']:<10}")
+            
+            input("\nНажмите Enter чтобы вернуться в меню...")
+        except json.JSONDecodeError:
+            print("Ошибка чтения файла статистики.")
+    
+    def setup(self) -> None:
+        print("\nЭтап размещения кораблей:")
+        print("="*40)
+        
+        print("\nИгрок 1 размещает корабли:")
+        self.player1.place_ships()
+        
+        if isinstance(self.player2, AIPlayer):
+            print("\nКомпьютер размещает корабли...")
+            self.player2.place_ships()
+        else:
+            print("\nИгрок 2 размещает корабли:")
+            self.player2.place_ships()
