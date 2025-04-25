@@ -491,12 +491,10 @@ class Game:
             print("-"*20)
             
             if self.current_player.make_move(self.opponent):
-                # Если было попадание, проверяем не потоплены ли все корабли
                 if self.opponent.board.all_ships_sunk():
                     self.end_game(self.current_player, self.opponent)
                     break
             else:
-                # Если был промах, меняем игрока
                 self.current_player, self.opponent = self.opponent, self.current_player
                 turn += 1
             
@@ -507,14 +505,12 @@ class Game:
         print(f"Поздравляем, {winner.name} победил!")
         print("="*40)
         
-        # Показать итоговые поля
         print("\nИтоговое поле победителя:")
         winner.board.display(show_ships=True)
         
         print("\nИтоговое поле проигравшего:")
         loser.board.display(show_ships=True)
         
-        # Показать статистику
         print("\nИтоговая статистика:")
         print(f"{'Параметр':<15} {'Победитель':<15} {'Проигравший':<15}")
         print("-"*45)
@@ -525,7 +521,6 @@ class Game:
         print(f"{'Потоплено':<15} {winner.ships_sunk:<15} {loser.ships_sunk:<15}")
         print(f"{'Очки':<15} {winner.score:<15} {loser.score:<15}")
         
-        # Сохранить статистику
         winner.save_stats()
         loser.save_stats()
         
