@@ -481,3 +481,61 @@ class Game:
         else:
             print("\nИгрок 2 размещает корабли:")
             self.player2.place_ships()
+    def play(self) -> None:
+        print("\nНачинаем игру!")
+        print("="*40)
+        
+        turn = 1
+        while True:
+            print(f"\nХод {turn}")
+            print("-"*20)
+            
+            if self.current_player.make_move(self.opponent):
+                # Если было попадание, проверяем не потоплены ли все корабли
+                if self.opponent.board.all_ships_sunk():
+                    self.end_game(self.current_player, self.opponent)
+                    break
+            else:
+                # Если был промах, меняем игрока
+                self.current_player, self.opponent = self.opponent, self.current_player
+                turn += 1
+            
+            input("\nНажмите Enter чтобы продолжить...")
+    
+    def end_game(self, winner: Player, loser: Player) -> None:
+        print("\n" + "="*40)
+        print(f"Поздравляем, {winner.name} победил!")
+        print("="*40)
+        
+        # Показать итоговые поля
+        print("\nИтоговое поле победителя:")
+        winner.board.display(show_ships=True)
+        
+        print("\nИтоговое поле проигравшего:")
+        loser.board.display(show_ships=True)
+        
+        # Показать статистику
+        print("\nИтоговая статистика:")
+        print(f"{'Параметр':<15} {'Победитель':<15} {'Проигравший':<15}")
+        print("-"*45)
+        print(f"{'Имя':<15} {winner.name:<15} {loser.name:<15}")
+        print(f"{'Выстрелы':<15} {winner.shots:<15} {loser.shots:<15}")
+        print(f"{'Попадания':<15} {winner.hits:<15} {loser.hits:<15}")
+        print(f"{'Точность':<15} {winner.get_accuracy():<15.1f}% {loser.get_accuracy():<15.1f}%")
+        print(f"{'Потоплено':<15} {winner.ships_sunk:<15} {loser.ships_sunk:<15}")
+        print(f"{'Очки':<15} {winner.score:<15} {loser.score:<15}")
+        
+        # Сохранить статистику
+        winner.save_stats()
+        loser.save_stats()
+        
+        input("\nНажмите Enter чтобы вернуться в меню...")
+        self.show_menu()
+    
+    def start(self) -> None:
+        self.setup()
+        self.play()
+
+if __name__ == "__main__":
+    game = Game()
+    game.start()
