@@ -387,4 +387,57 @@ class AIPlayer(Player):
                     if 0 <= nx < self.board.size and 0 <= ny < self.board.size:
                         if (nx, ny) in self.available_shots:
                             self.available_shots.remove((nx, ny))
+
+class Game:
+    def __init__(self):
+        print("Добро пожаловать в игру 'Морской бой'!")
+        print("="*40)
+        self.show_menu()
     
+    def show_menu(self) -> None:
+        while True:
+            print("\nГлавное меню:")
+            print("1. Играть против компьютера")
+            print("2. Играть против другого игрока")
+            print("3. Просмотреть статистику")
+            print("4. Выход")
+            
+            choice = input("Выберите опцию: ")
+            
+            if choice == '1':
+                self.setup_game_vs_ai()
+                break
+            elif choice == '2':
+                self.setup_game_vs_player()
+                break
+            elif choice == '3':
+                self.show_stats()
+            elif choice == '4':
+                print("До свидания!")
+                exit()
+            else:
+                print("Неверный выбор. Попробуйте снова.")
+    
+    def setup_game_vs_ai(self) -> None:
+        print("\nВыберите уровень сложности:")
+        print("1. Легкий")
+        print("2. Средний")
+        print("3. Сложный")
+        
+        while True:
+            choice = input("Ваш выбор (1-3): ")
+            if choice in ['1', '2', '3']:
+                difficulty = ["easy", "medium", "hard"][int(choice)-1]
+                break
+            print("Неверный выбор. Попробуйте снова.")
+        
+        self.player1 = Player(input("Введите ваше имя: "))
+        self.player2 = AIPlayer(difficulty)
+        self.current_player = self.player1
+        self.opponent = self.player2
+    
+    def setup_game_vs_player(self) -> None:
+        self.player1 = Player(input("Введите имя первого игрока: "))
+        self.player2 = Player(input("Введите имя второго игрока: "))
+        self.current_player = self.player1
+        self.opponent = self.player2
